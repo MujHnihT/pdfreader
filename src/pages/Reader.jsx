@@ -6,18 +6,28 @@ import PdfScrollViewer from "../components/PdfScrollViewer";
 import { rememberPage } from "../utils/storage";
 import { buildDownloadUrl } from "../utils/drive";
 import { toSlug } from "../utils/slug";
+import { getSessionIndex } from "../utils/chapterIndex";
 
 export default function Reader() {
   const navigate = useNavigate();
   const { slug, chapterSlug } = useParams();
 
+  // map slug -> folderId (để fallback fetch nếu chưa có session index)
   const { items: stories } = useDriveStories();
   const story = useMemo(() => stories.find((s) => toSlug(s.name) === slug), [stories, slug]);
   const folderId = story?.id;
 
-  const { items: chapters } = useDriveChapters(folderId);
+  // 1) Ưu tiên chapters từ session (đã prefetch ngầm ở trang Chapters)
+  const sess = getSessionIndex(slug);
+  const sessionChapters = sess?.chapters || [];
 
-  // tìm chapter theo slug
+  // 2) Fallback: nếu chưa có session, fetch từ Drive
+  const { items: fetchedChapters } = useDriveChapters(folderId);
+
+  // 3) Nguồn chính để điều hướng
+  const chapters = sessionChapters.length ? sessionChapters : fetchedChapters;
+
+  // xác định current, prev, next theo slug
   const currentIndex = useMemo(
     () => chapters.findIndex((c) => c.slug === chapterSlug),
     [chapters, chapterSlug]
@@ -90,7 +100,6 @@ export default function Reader() {
         </button>
       </div>
 
-      {/* Hiển thị tên chương gọn */}
       <div style={titleBadge}>
         {currentChapter?.displayName || "Đang mở chương…"}
       </div>
