@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import useDriveStories from "../hooks/useDriveStories";
+import { toSlug } from "../utils/slug";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -24,37 +25,40 @@ export default function Home() {
           gap: 12,
         }}
       >
-        {stories.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => navigate(`/story/${s.id}`)}
-            style={{
-              textAlign: "left",
-              padding: 12,
-              background: "#fff",
-              border: "1px solid #e5e7eb",
-              borderRadius: 12,
-              cursor: "pointer",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-            }}
-            title={s.name}
-          >
-            <div
+        {stories.map((s) => {
+          const slug = toSlug(s.name);
+          return (
+            <button
+              key={s.id}
+              onClick={() => navigate(`/story/${slug}`)}
               style={{
-                fontWeight: 600,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                marginBottom: 6,
+                textAlign: "left",
+                padding: 12,
+                background: "#fff",
+                border: "1px solid #e5e7eb",
+                borderRadius: 12,
+                cursor: "pointer",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
               }}
+              title={s.name}
             >
-              {s.name}
-            </div>
-            <div style={{ fontSize: 12, opacity: 0.75 }}>
-              Cập nhật: {new Date(s.modifiedTime).toLocaleString()}
-            </div>
-          </button>
-        ))}
+              <div
+                style={{
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  marginBottom: 6,
+                }}
+              >
+                {s.name}
+              </div>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>
+                Cập nhật: {new Date(s.modifiedTime).toLocaleString()}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ marginTop: 16 }}>

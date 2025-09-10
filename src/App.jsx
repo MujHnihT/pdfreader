@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import { pdfjs } from "react-pdf";
@@ -39,8 +38,9 @@ function Shell() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/story/:storyId" element={<Chapters />} />
-        <Route path="/reader/:storyId/:chapterId" element={<Reader />} />
+        <Route path="/story/:slug" element={<Chapters />} />
+        {/* chapterSlug thay cho chapterId */}
+        <Route path="/reader/:slug/:chapterSlug" element={<Reader />} />
       </Routes>
     </>
   );
