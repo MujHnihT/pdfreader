@@ -11,45 +11,42 @@ export default function Reader() {
   const navigate = useNavigate();
   const { slug, chapterSlug } = useParams();
 
-  // map slug -> folderId
   const { items: stories } = useDriveStories();
   const story = useMemo(() => stories.find((s) => toSlug(s.name) === slug), [stories, slug]);
   const folderId = story?.id;
 
-  // lấy list chapters theo folderId (để tìm chapterId, prev/next)
   const { items: chapters } = useDriveChapters(folderId);
 
-  // xác định chương hiện tại theo chapterSlug
-  const currentIndex = useMemo(() => {
-    if (!chapters.length) return -1;
-    return chapters.findIndex((c) => toSlug(c.name) === chapterSlug);
-  }, [chapters, chapterSlug]);
-
+  // tìm chapter theo slug
+  const currentIndex = useMemo(
+    () => chapters.findIndex((c) => c.slug === chapterSlug),
+    [chapters, chapterSlug]
+  );
   const currentChapter = currentIndex >= 0 ? chapters[currentIndex] : null;
   const prevChapter = currentIndex > 0 ? chapters[currentIndex - 1] : null;
-  const nextChapter = currentIndex >= 0 && currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;
+  const nextChapter =
+    currentIndex >= 0 && currentIndex < chapters.length - 1
+      ? chapters[currentIndex + 1]
+      : null;
 
   const [currentDocId, setCurrentDocId] = useState(null);
-  const [pdfSrc, setPdfSrc] = useState(null); // { url: string }
+  const [pdfSrc, setPdfSrc] = useState(null);
 
   const openById = useCallback((id) => {
     setCurrentDocId(id);
-    setPdfSrc({ url: buildDownloadUrl(id) }); // để pdf.js tự tải, tránh CORS khi tự fetch
+    setPdfSrc({ url: buildDownloadUrl(id) });
   }, []);
 
-  // Khi xác định được currentChapter -> mở PDF
   useEffect(() => {
     if (currentChapter?.id) openById(currentChapter.id);
   }, [currentChapter?.id, openById]);
 
   const goPrevChapter = useCallback(() => {
-    if (!prevChapter) return;
-    navigate(`/reader/${slug}/${toSlug(prevChapter.name)}`);
+    if (prevChapter) navigate(`/reader/${slug}/${prevChapter.slug}`);
   }, [navigate, slug, prevChapter]);
 
   const goNextChapter = useCallback(() => {
-    if (!nextChapter) return;
-    navigate(`/reader/${slug}/${toSlug(nextChapter.name)}`);
+    if (nextChapter) navigate(`/reader/${slug}/${nextChapter.slug}`);
   }, [navigate, slug, nextChapter]);
 
   return (
@@ -65,7 +62,6 @@ export default function Reader() {
           onClick={goPrevChapter}
           disabled={!prevChapter}
           style={{ ...pillBtn, opacity: prevChapter ? 1 : 0.5 }}
-          aria-label="Chương trước"
         >
           ← Chương trước
         </button>
@@ -81,19 +77,22 @@ export default function Reader() {
             alignItems: "center",
             justifyContent: "center",
           }}
-          aria-label="Mục lục"
         >
-          ☰ Mục lục
+          ☰ {story?.name || "Mục lục"}
         </Link>
 
         <button
           onClick={goNextChapter}
           disabled={!nextChapter}
           style={{ ...pillBtn, opacity: nextChapter ? 1 : 0.5 }}
-          aria-label="Chương sau"
         >
           Chương sau →
         </button>
+      </div>
+
+      {/* Hiển thị tên chương gọn */}
+      <div style={titleBadge}>
+        {currentChapter?.displayName || "Đang mở chương…"}
       </div>
     </div>
   );
@@ -108,7 +107,6 @@ const toolbarWrap = {
   gap: 10,
   zIndex: 50,
 };
-
 const pillBtn = {
   padding: "10px 14px",
   borderRadius: 999,
@@ -116,4 +114,15 @@ const pillBtn = {
   background: "#fff",
   cursor: "pointer",
   boxShadow: "0 6px 16px rgba(0,0,0,0.18)",
+};
+const titleBadge = {
+  position: "fixed",
+  left: 16,
+  top: 12,
+  padding: "6px 10px",
+  background: "rgba(255,255,255,0.9)",
+  borderRadius: 8,
+  fontSize: 14,
+  boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+  zIndex: 50,
 };
