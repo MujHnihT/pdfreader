@@ -24,6 +24,11 @@ export function saveSessionIndex(storySlug, chapters) {
       name: c.name,
       displayName: c.displayName,
       slug: c.slug,
+      type: c.type,
+      mimeType: c.mimeType,
+      url: c.url,
+      size: c.size,
+      modifiedTime: c.modifiedTime,
     })),
   };
   setAllSessionIndex(all);

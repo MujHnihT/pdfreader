@@ -8,9 +8,7 @@ import { saveSessionIndex } from "../utils/chapterIndex";
 export default function Chapters() {
   const { slug } = useParams();
   const { items: stories } = useDriveStories();
-
-  // tìm đúng truyện
-  const story = useMemo(() => stories.find((s) => toSlug(s.name) === slug), [stories, slug]);
+  const story = useMemo(() => stories.find((item) => toSlug(item.name) === slug), [stories, slug]);
   const folderId = story?.id;
 
   const {
@@ -24,80 +22,77 @@ export default function Chapters() {
     prefetchAllMeta,
   } = useDriveChapters(folderId);
 
-  // 1) UI: chỉ tải trang đầu
   useEffect(() => {
-    if (!folderId) return;
-    fetchFirstPage();
+    if (folderId) fetchFirstPage();
   }, [folderId, fetchFirstPage]);
 
-  // 2) NGẦM: tải toàn bộ danh sách & lưu vào sessionStorage
   useEffect(() => {
     if (!folderId || !story?.name) return;
     let cancelled = false;
     (async () => {
       const all = await prefetchAllMeta();
-      if (!cancelled && all.length) {
-        saveSessionIndex(toSlug(story.name), all);
-      }
+      if (!cancelled && all.length) saveSessionIndex(toSlug(story.name), all);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [folderId, story?.name, prefetchAllMeta]);
 
   return (
-    <main style={{ padding: 16 }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-        <h2 style={{ margin: 0 }}>{story ? story.name : "Đang tải…"}</h2>
-        <Link to="/" style={{ fontSize: 14 }}>← Trang chủ</Link>
-        <div style={{ marginLeft: "auto", fontSize: 12, opacity: 0.7 }}>
-          {prefetching ? "Đang tải toàn bộ chương (ngầm)…" : ""}
+    <main className="reader-shell">
+      <aside className="chapter-sidebar">
+        <div className="sidebar-title">
+          <span>☷</span>
+          <strong>Danh sách chương</strong>
         </div>
-      </div>
-
-      {error && <div style={{ color: "crimson", marginTop: 8 }}>{error}</div>}
-
-      <section style={{ marginTop: 16 }}>
-        <h3 style={{ margin: "8px 0" }}>Danh sách chương</h3>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {chapters.map((c) => (
-            <li key={c.id}>
-              <Link
-                to={`/reader/${slug}/${c.slug}`}
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  padding: "10px 12px",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: 10,
-                  marginBottom: 8,
-                  textDecoration: "none",
-                  color: "inherit",
-                  background: "#fff",
-                }}
-                title={c.displayName}
-              >
-                <div
-                  style={{
-                    flex: 1,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {c.displayName}
-                </div>
-                <div style={{ fontSize: 12, opacity: 0.75 }}>
-                  {c.size ? `${(c.size / 1048576).toFixed(2)} MB` : "—"} ·{" "}
-                  {new Date(c.modifiedTime).toLocaleString()}
-                </div>
+        {error && <div className="error-text">{error}</div>}
+        <ul className="chapter-list">
+          {chapters.map((chapter) => (
+            <li key={chapter.id}>
+              <Link to={`/reader/${slug}/${chapter.slug}`} className="chapter-item" title={chapter.displayName}>
+                <span className="dot" />
+                <span>{chapter.displayName}</span>
+                <small>{chapter.type?.toUpperCase()}</small>
               </Link>
             </li>
           ))}
         </ul>
-
-        <div style={{ marginTop: 12 }}>
-          <button onClick={fetchNext} disabled={!nextToken || loading}>
-            {nextToken ? (loading ? "Đang tải..." : "Tải thêm") : "Hết danh sách"}
+        <div className="sidebar-footer">
+          <button className="secondary-btn full" onClick={fetchNext} disabled={!nextToken || loading}>
+            {nextToken ? (loading ? "Đang tải..." : "Tải thêm chương") : "Hết danh sách"}
           </button>
+        </div>
+      </aside>
+
+      <section className="content-column">
+        <div className="story-hero">
+          <div className="cover-art hero-cover" />
+          <div className="hero-main">
+            <h1>{story ? story.name : "Đang tải..."}</h1>
+            <p>Tác giả: <span>An Nhiên</span></p>
+            <div className="tag-row">
+              <span>Ngôn tình</span>
+              <span>Hiện đại</span>
+              <span>Chữa lành</span>
+            </div>
+            <div className="rating-line">★ <strong>4.7</strong> <span>(2.1K đánh giá)</span></div>
+            <p className="story-desc">
+              Truyện được tải trực tiếp từ Google Drive. Hỗ trợ chương PDF, TXT và DOCX.
+            </p>
+          </div>
+          <div className="stats-card">
+            <div><span>Lượt xem</span><strong>125.6K</strong></div>
+            <div><span>Lượt theo dõi</span><strong>12.8K</strong></div>
+            <div><span>Số chương</span><strong>{chapters.length}</strong></div>
+            <div><span>Cập nhật</span><strong>{story?.modifiedTime ? new Date(story.modifiedTime).toLocaleDateString() : "..."}</strong></div>
+          </div>
+        </div>
+
+        <div className="reader-card empty-reader-card">
+          <Link className="primary-btn inline-link" to={chapters[0] ? `/reader/${slug}/${chapters[0].slug}` : "#"}>
+            Đọc chương đầu
+          </Link>
+          {prefetching && <span className="muted">Đang tải toàn bộ chương...</span>}
         </div>
       </section>
     </main>

@@ -8,19 +8,19 @@ export default function ChaptersList({ chapters, onOpen, onLoadMore, hasMore, er
         {error && <span style={{ color: "crimson" }}> · Lỗi: {error}</span>}
       </div>
 
-      {chapters.map((c) => (
+      {chapters.map((chapter) => (
         <div
-          key={c.id}
-          onClick={() => onOpen(c)}
+          key={chapter.id}
+          onClick={() => onOpen(chapter)}
           style={{ padding: "8px 10px", cursor: "pointer" }}
-          title={c.name}
+          title={chapter.name}
         >
           <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {c.name}
+            {chapter.name}
           </div>
           <small style={{ opacity: 0.7 }}>
-            {c.size ? `${(c.size / 1048576).toFixed(2)} MB` : "—"} ·{" "}
-            {new Date(c.modifiedTime).toLocaleString()}
+            {chapter.size ? `${(chapter.size / 1048576).toFixed(2)} MB` : "—"} ·{" "}
+            {new Date(chapter.modifiedTime).toLocaleString()}
           </small>
         </div>
       ))}

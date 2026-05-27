@@ -8,61 +8,39 @@ export default function Home() {
   const { items: stories, nextToken, error, loading, fetchNext } = useDriveStories();
 
   return (
-    <main style={{ padding: "16px" }}>
-      <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-        <h2 style={{ margin: 0 }}>Danh sách truyện</h2>
-        {error && <span style={{ color: "crimson" }}> · {error}</span>}
+    <main className="app-page">
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">Google Drive Library</p>
+          <h1>Danh sách truyện</h1>
+        </div>
+        {error && <span className="error-text">{error}</span>}
       </div>
 
       {stories.length === 0 && !loading && !error && (
-        <div>Không có truyện nào trong thư mục gốc.</div>
+        <div className="empty-state">Không có truyện nào trong thư mục gốc.</div>
       )}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: 12,
-        }}
-      >
-        {stories.map((s) => {
-          const slug = toSlug(s.name);
+      <div className="story-grid">
+        {stories.map((story) => {
+          const slug = toSlug(story.name);
           return (
             <button
-              key={s.id}
+              key={story.id}
               onClick={() => navigate(`/story/${slug}`)}
-              style={{
-                textAlign: "left",
-                padding: 12,
-                background: "#fff",
-                border: "1px solid #e5e7eb",
-                borderRadius: 12,
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-              }}
-              title={s.name}
+              className="story-card"
+              title={story.name}
             >
-              <div
-                style={{
-                  fontWeight: 600,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  marginBottom: 6,
-                }}
-              >
-                {s.name}
-              </div>
-              <div style={{ fontSize: 12, opacity: 0.75 }}>
-                Cập nhật: {new Date(s.modifiedTime).toLocaleString()}
-              </div>
+              <div className="cover-art" />
+              <div className="story-card-title">{story.name}</div>
+              <div className="muted">Cập nhật: {new Date(story.modifiedTime).toLocaleString()}</div>
             </button>
           );
         })}
       </div>
 
-      <div style={{ marginTop: 16 }}>
-        <button onClick={fetchNext} disabled={!nextToken || loading}>
+      <div className="load-more">
+        <button className="secondary-btn" onClick={fetchNext} disabled={!nextToken || loading}>
           {nextToken ? (loading ? "Đang tải..." : "Tải thêm") : "Hết danh sách"}
         </button>
       </div>

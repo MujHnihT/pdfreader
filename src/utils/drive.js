@@ -14,6 +14,9 @@ export const dedupeMergeSort = (prev, incoming) => {
 export const buildDownloadUrl = (fileId) =>
   `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
 
+export const buildExportUrl = (fileId, mimeType = "text/plain") =>
+  `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=${encodeURIComponent(mimeType)}&key=${API_KEY}`;
+
 export async function driveList({
   q,
   fields,

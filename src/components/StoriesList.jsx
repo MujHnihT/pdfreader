@@ -11,21 +11,21 @@ export default function StoriesList({
 }) {
   return (
     <aside style={{ borderRight: "1px solid #e5e7eb", overflow: "auto" }}>
-      {stories.map((s) => (
+      {stories.map((story) => (
         <div
-          key={s.id}
-          onClick={() => onSelect(s.id)}
+          key={story.id}
+          onClick={() => onSelect(story.id)}
           style={{
             padding: "8px 10px",
             cursor: "pointer",
-            background: selectedId === s.id ? "rgba(59,130,246,0.12)" : "transparent",
+            background: selectedId === story.id ? "rgba(59,130,246,0.12)" : "transparent",
           }}
-          title={s.name}
+          title={story.name}
         >
           <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {s.name}
+            {story.name}
           </div>
-          <small style={{ opacity: 0.7 }}>{new Date(s.modifiedTime).toLocaleString()}</small>
+          <small style={{ opacity: 0.7 }}>{new Date(story.modifiedTime).toLocaleString()}</small>
         </div>
       ))}
       <div style={{ padding: "8px 10px", display: "flex", gap: 8 }}>
